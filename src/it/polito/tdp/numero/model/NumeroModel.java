@@ -1,18 +1,39 @@
 package it.polito.tdp.numero.model;
 
 import java.security.InvalidParameterException;
+import java.util.HashMap;
+
+import java.util.Map;
+
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 
 public class NumeroModel {
 
 	private final int NMAX = 100;
 	private final int TMAX = 8;
     private int segreto;
-	private int tentativiFatti;
+    
+    private Map <Integer,Boolean> tentativi; 
+    
+	//private int tentativiFatti;
+    
+    private IntegerProperty tentativiFatti; 
+    
+    
+    
 	private boolean inGioco = false;
 	
 	
 	public NumeroModel() {
 		inGioco=false; 
+		tentativiFatti= new SimpleIntegerProperty(); 
+	
+		tentativi= new HashMap<Integer,Boolean>(); 
+	
+		for(int i=1; i<=100;i++) {
+			tentativi.put(new Integer(i), false);
+		}
 	}
 	
 	/**
@@ -20,10 +41,16 @@ public class NumeroModel {
 	 */
 	
 	public void newGame() {
+		
 		inGioco= true; 
+		tentativi= new HashMap<Integer,Boolean>(); 
+		
+		for(int i=1; i<=100;i++) {
+			tentativi.put(new Integer(i), false);
+		}
 		
 		this.segreto = (int) (Math.random() * NMAX) + 1;
-		this.tentativiFatti = 0;
+		this.tentativiFatti.set(0);
 		}
 	
 	/**
@@ -45,11 +72,19 @@ public class NumeroModel {
 			throw new InvalidParameterException(String.format("Devi inserire un numero tra %d e %d",1,NMAX)); 
 		
 		}   
+		
+		
+		
 	//gestisce tentativo 
-		this.tentativiFatti++; 
-		if (tentativiFatti==this.TMAX) {
+		this.setTentativiFatti(this.tentativiFatti.get()+1);
+		
+		this.tentativi.put(new Integer(t),true); 
+		
+		if (this.tentativiFatti.get()==this.TMAX) {
 			//la partita è finita 
 			this.inGioco=false; 
+			
+			
 		}
 		
 	if(t==this.segreto) {
@@ -68,8 +103,23 @@ public class NumeroModel {
 	
 	public boolean tentativoValido(int t) {
 		if(t<1 || t>NMAX) {
+			
 			return false; 
 		}
+		else {
+			if(this.tentativi.get(new Integer(t))==true)
+					return false;
+			else 
+				return true; 
+		}
+		
+		
+		
+	}
+	
+	public boolean tentativoLista(int t) {
+		if(this.tentativi.containsKey(t))
+			return false; 
 		return true; 
 	}
 
@@ -81,13 +131,24 @@ public class NumeroModel {
 		return segreto;
 	}
 
-	public int getTentativiFatti() {
-		return tentativiFatti;
-	}
+	
 
 	public int getTMAX() {
 		return TMAX;
 	}
+	
+	public final IntegerProperty tentativiFattiProperty() {
+		return this.tentativiFatti; 
+	}
+	
+	public final int getTentativiFatti() {
+		return this.tentativiFattiProperty().get();
+	}
+	
+	public final void setTentativiFatti(final int tentativiFatti) {
+		this.tentativiFattiProperty().set(tentativiFatti);
+	}
+	
 	
 	
 }
